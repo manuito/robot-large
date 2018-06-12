@@ -14,6 +14,8 @@ Here I will publish everything I did to build my first "large" robot, using :
 * A RaspberryPi W Zero for management / wifi support 
 * A level shifter 5v-3.3v for UART link between Raspberry and Arduino
 
+![An ugly boy](docs/robot.jpg?raw=true "An ugly boy")
+
 ## Building it
 
 I will publish more details on the used components later. On the protoboard their is only socket for the other stuffs, so everything can be re-used for other projects.
