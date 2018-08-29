@@ -1,0 +1,21 @@
+package tools
+
+import (
+	"log"
+	"net"
+)
+
+// GetOutboundIP : Get preferred outbound ip of this machine
+func GetOutboundIP() net.IP {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+
+	log.Println("Searching ip address. Found " + localAddr.IP.String())
+
+	return localAddr.IP
+}

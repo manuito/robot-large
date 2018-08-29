@@ -1,0 +1,13 @@
+{
+    "RobotName": "Robot-Toby",
+    "SerialInf": "tty1",
+    "DebounceBufferSize" : 10,
+    "DebounceMaxVariation" : 10,
+    "StandardMove" : 100,
+    "StandardSpeed" : 10,
+    "StandardDegree" : 90,
+    "CentimerToSpeedRatio" : 350,
+    "DegreeToSpeedRatio" : 4,
+    "SpeedChangeSteps" : 10,
+    "Debug" : false
+}
