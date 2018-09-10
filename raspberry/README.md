@@ -1,4 +1,4 @@
-# here the Golang code for the raspberry Pi W Zero =  Pilote application
+# Pilote application (Golang code for the raspberry Pi W Zero) 
 
 The pilote application is a GO driving app running in large-robot Raspberry PI W. It manages serial communication with the MEGA MCU, provides a REST service (over wifi) for remote driving, and provides a limited "auto-pilote" mode.
 
