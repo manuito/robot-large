@@ -14,7 +14,6 @@ import (
 // Configuration : Robot configuration holder
 type Configuration struct {
 	RobotName            string
-	SerialInf            string
 	DebounceBufferSize   int
 	DebounceMaxVariation int
 	StandardMove         int
@@ -23,7 +22,12 @@ type Configuration struct {
 	CentimerToSpeedRatio int
 	DegreeToSpeedRatio   int
 	SpeedChangeSteps     int
-	Debug                bool
+	LogLevel             string
+	MinimalStopRange     int
+	MonitoringDelayMs    int
+	SerialSimulation     string
+	SerialDevice         string
+	SerialSpeed          int
 }
 
 func loadConfiguration() Configuration {

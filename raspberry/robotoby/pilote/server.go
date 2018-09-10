@@ -19,22 +19,24 @@ import (
 
 // GET http://1.2.3.4:8080/state/robot
 func getCurrentRobotState(request *restful.Request, response *restful.Response) {
-	log.Println("Getting robot state data")
+	application.Debug("Getting robot state data")
 	response.WriteEntity(GetCurrentRobotState())
 }
 
 // GET http://1.2.3.4:8080/state/application
 func getCurrentApplicationState(request *restful.Request, response *restful.Response) {
-	log.Println("Getting application state data")
+	application.Debug("Getting application state data")
 	response.WriteEntity(application.State)
 }
 
 // PUT http://1.2.3.4:8080/pilote/command
 func addCommand(request *restful.Request, response *restful.Response) {
-	log.Println("Adding new command to run")
+	application.Debug("Adding new command to run")
 	command := Command{}
 	err := request.ReadEntity(&command)
 	if err == nil {
+		// Always stop auto pilote if enabled
+		stopAutoPilote()
 		command.Process()
 		response.WriteHeaderAndEntity(http.StatusCreated, command)
 	} else {
@@ -44,15 +46,29 @@ func addCommand(request *restful.Request, response *restful.Response) {
 
 // PUT http://1.2.3.4:8080/pilote/chain
 func addChain(request *restful.Request, response *restful.Response) {
-	log.Println("Adding new chain to run")
+	application.Debug("Adding new chain to run")
 	chain := ChainedCommand{}
 	err := request.ReadEntity(&chain)
 	if err == nil {
+		// Always stop auto pilote if enabled
+		stopAutoPilote()
 		chain.Process()
 		response.WriteHeaderAndEntity(http.StatusCreated, chain)
 	} else {
 		response.WriteError(http.StatusInternalServerError, err)
 	}
+}
+
+// POST http://1.2.3.4:8080/pilote/auto
+func startAuto(request *restful.Request, response *restful.Response) {
+	application.Debug("Starting auto-pilote mode")
+	startFullAutoPilote()
+}
+
+// DELETE http://1.2.3.4:8080/pilote/auto
+func stopAuto(request *restful.Request, response *restful.Response) {
+	application.Debug("Interrupt auto-pilote mode")
+	stopAutoPilote()
 }
 
 // Routes for state access
@@ -96,14 +112,23 @@ func piloteWebService() *restful.WebService {
 		Doc("add a command to process").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Reads(Command{}). // from the request
-		Returns(201, "OK", Command{}))
+		Returns(200, "OK", Command{}))
 
 	ws.Route(ws.PUT("chain").To(addChain).
 		Doc("add a chain of commands to process").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Reads(ChainedCommand{}). // from the request
-		Returns(201, "OK", ChainedCommand{}))
+		Returns(200, "OK", ChainedCommand{}))
 
+	ws.Route(ws.POST("auto").To(startAuto).
+		Doc("Start auto-pilote mode").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Returns(200, "OK", struct{}{}))
+
+	ws.Route(ws.DELETE("auto").To(stopAuto).
+		Doc("Stop any auto pilote mode").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Returns(200, "OK", struct{}{}))
 	return ws
 }
 
@@ -135,8 +160,8 @@ func StartServer() {
 
 	ip := application.State.OutBountIP.String()
 
-	log.Printf("Get the API using http://" + ip + ":8080/apidocs.json")
-	log.Printf("Open Swagger UI using http://" + ip + ":8080/apidocs/?url=http://" + ip + ":8080/apidocs.json")
+	application.Info("Get the API using http://" + ip + ":8080/apidocs.json")
+	application.Info("Open Swagger UI using http://" + ip + ":8080/apidocs/?url=http://" + ip + ":8080/apidocs.json")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
@@ -160,8 +185,8 @@ func enrichSwaggerObject(swo *spec.Swagger) {
 	swo.Tags = []spec.Tag{
 		spec.Tag{TagProps: spec.TagProps{
 			Name:        "state",
-			Description: "Processing state"}},
+			Description: "Processing state and feedback on robot"}},
 		spec.Tag{TagProps: spec.TagProps{
-			Name:        "commands",
-			Description: "Managing input commands"}}}
+			Name:        "pilote",
+			Description: "Managing input commands and driving"}}}
 }

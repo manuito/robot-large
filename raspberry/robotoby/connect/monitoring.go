@@ -1,7 +1,7 @@
 package connect
 
 import (
-	"log"
+	"robotoby/application"
 	"time"
 )
 
@@ -14,20 +14,24 @@ import (
 // Monitors : all the monitoring elements in a channel
 var Monitors = make(chan RobotMonitoring)
 var stop = false
+var delay = time.Duration(application.State.Config.MonitoringDelayMs)
 
 // StartGetMonitoring :
 func StartGetMonitoring() {
-	log.Println("Starting auto read of monitoring")
+	application.Info("Starting auto read of monitoring")
 	go func() {
 		for !stop {
-			time.Sleep(100 * time.Millisecond)
-			Monitors <- GetMonitoring()
+			time.Sleep(delay * time.Millisecond)
+			mon := GetMonitoring()
+			if mon != nil {
+				Monitors <- *mon
+			}
 		}
 	}()
 }
 
 // StopGetMonitoring :
 func StopGetMonitoring() {
-	log.Println("Stopping monitoring auto read")
+	application.Info("Stopping monitoring auto read")
 	stop = true
 }

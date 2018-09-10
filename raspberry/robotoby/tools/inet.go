@@ -15,7 +15,5 @@ func GetOutboundIP() net.IP {
 
 	localAddr := conn.LocalAddr().(*net.UDPAddr)
 
-	log.Println("Searching ip address. Found " + localAddr.IP.String())
-
 	return localAddr.IP
 }

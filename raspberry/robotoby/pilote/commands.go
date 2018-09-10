@@ -1,7 +1,6 @@
 package pilote
 
 import (
-	"log"
 	"robotoby/application"
 	"robotoby/connect"
 	"strconv"
@@ -14,8 +13,10 @@ import (
  * going from a low level speed-based actions to high level distance / degree actions
  */
 
+// Options for chained commands
 var supportedOptions = []string{
 	"AUTO_AVOIDANCE",
+	"FLUID_MOVE",
 }
 
 // Command : Model for a prepared command for pilote / auto-pilote
@@ -64,15 +65,21 @@ type ChainedCommand struct {
  *  RIG - dim0 => Turn right continuously at dim0 speed
  */
 
-// Process : On specified command, run (in go routine)
+// Process : On specified command, run (in go routine). Default stop after command
 func (com Command) Process() error {
-	go com.getProcess()()
+	go com.getProcess()(true)
 	return nil
 }
 
-func (com Command) getProcess() func() {
+// ProcessNoStop : On specified command, run (in go routine), and do not call stop action (usefull for chained commands)
+func (com Command) ProcessNoStop() error {
+	go com.getProcess()(false)
+	return nil
+}
 
-	log.Println("Start a command for action " + com.Action)
+func (com Command) getProcess() func(doStop bool) {
+
+	application.Info("Start a command for action " + com.Action)
 
 	switch com.Action {
 	case "MCM":
@@ -88,9 +95,9 @@ func (com Command) getProcess() func() {
 	case "RIG":
 		return unscopedTurnRun('R', com.Dimensions)
 	default:
-		log.Println("Cannot process command " + com.Action)
+		application.Info("Cannot process command " + com.Action)
 	}
-	return func() {
+	return func(doStop bool) {
 		// Empty
 	}
 }
@@ -103,10 +110,12 @@ func (chain ChainedCommand) Process() error {
 
 func (chain ChainedCommand) getProcess() func() {
 	return func() {
-		log.Println("Start a command chain with options " + strings.Join(chain.Options, ", "))
+		application.Info("Start a command chain with options " + strings.Join(chain.Options, ", "))
+		options := options2Map(chain.Options)
+		_, fluidMove := options["FLUID_MOVE"]
 		for pos, com := range chain.Commands {
-			log.Println(" --- Command " + strconv.Itoa(pos) + " ---")
-			com.getProcess()()
+			application.Info(" --- Command " + strconv.Itoa(pos) + " ---")
+			com.getProcess()(!fluidMove)
 		}
 	}
 }
@@ -118,7 +127,7 @@ func (chain ChainedCommand) getProcess() func() {
  */
 
 // MCM
-func scopedMoveRun(dim []int) func() {
+func scopedMoveRun(dim []int) func(doStop bool) {
 
 	switch len(dim) {
 	case 0:
@@ -135,13 +144,13 @@ func scopedMoveRun(dim []int) func() {
 		return prepareScopedMoveVariableSpeedStepsRun(dim[1], dim[2], dim[0])
 	}
 
-	return func() {
-		log.Println("Wrong dim for scoped move command")
+	return func(doStop bool) {
+		application.Info("Wrong dim for scoped move command")
 	}
 }
 
 // LDE / RDE
-func scopedTurnRun(action rune, dim []int) func() {
+func scopedTurnRun(action rune, dim []int) func(doStop bool) {
 
 	switch len(dim) {
 	case 0:
@@ -155,13 +164,13 @@ func scopedTurnRun(action rune, dim []int) func() {
 		return prepareScopedTurnConstantSpeedRun(action, dim[1], dim[0])
 	}
 
-	return func() {
-		log.Println("Wrong dim for scoped turn command")
+	return func(doStop bool) {
+		application.Info("Wrong dim for scoped turn command")
 	}
 }
 
 // MOV
-func unscopedMoveRun(dim []int) func() {
+func unscopedMoveRun(dim []int) func(doStop bool) {
 
 	switch len(dim) {
 	case 0:
@@ -172,13 +181,13 @@ func unscopedMoveRun(dim []int) func() {
 		return prepareUnScopedMoveConstantSpeedRun(dim[0])
 	}
 
-	return func() {
-		log.Println("Wrong dim for unscoped move command")
+	return func(doStop bool) {
+		application.Info("Wrong dim for unscoped move command")
 	}
 }
 
 // LEF / RIG
-func unscopedTurnRun(action rune, dim []int) func() {
+func unscopedTurnRun(action rune, dim []int) func(doStop bool) {
 
 	switch len(dim) {
 	case 0:
@@ -189,8 +198,8 @@ func unscopedTurnRun(action rune, dim []int) func() {
 		return prepareUnscopedTurnConstantSpeedRun(action, dim[0])
 	}
 
-	return func() {
-		log.Println("Wrong dim for scoped turn command")
+	return func(doStop bool) {
+		application.Info("Wrong dim for scoped turn command")
 	}
 }
 
@@ -200,37 +209,41 @@ func unscopedTurnRun(action rune, dim []int) func() {
  * ############################################
  */
 
-func prepareScopedMoveConstantSpeedRun(speed, centimeter int) func() {
+func prepareScopedMoveConstantSpeedRun(speed, centimeter int) func(doStop bool) {
 
 	duration := prepareDurationForDistance(speed, centimeter)
 
-	return func() {
+	return func(doStop bool) {
 		// Process direct speed
 		processMoveCentimeterAction(speed, duration)
 
-		// And stop
-		processStopAction()
+		// And stop if asked
+		if doStop {
+			processStopAction()
+		}
 	}
 }
 
-func prepareScopedTurnConstantSpeedRun(action rune, speed, degree int) func() {
+func prepareScopedTurnConstantSpeedRun(action rune, speed, degree int) func(doStop bool) {
 
 	duration := prepareDurationForTurnDegree(speed, degree)
 
-	return func() {
+	return func(doStop bool) {
 		// Process direct speed
 		processTurnDegreeAction(action, speed, duration)
 
-		// And stop
-		processStopAction()
+		// And stop if asked
+		if doStop {
+			processStopAction()
+		}
 	}
 }
 
-func prepareUnScopedMoveConstantSpeedRun(speed int) func() {
+func prepareUnScopedMoveConstantSpeedRun(speed int) func(doStop bool) {
 
-	return func() {
+	return func(doStop bool) {
 
-		log.Println(" => start unscoped move at speed " + strconv.Itoa(speed))
+		application.Info(" => start unscoped move at speed " + strconv.Itoa(speed))
 
 		// Process direct speed
 		command := connect.RobotCommand{Action: 'S', Dim: speed}
@@ -238,11 +251,11 @@ func prepareUnScopedMoveConstantSpeedRun(speed int) func() {
 	}
 }
 
-func prepareUnscopedTurnConstantSpeedRun(action rune, speed int) func() {
+func prepareUnscopedTurnConstantSpeedRun(action rune, speed int) func(doStop bool) {
 
-	return func() {
+	return func(doStop bool) {
 
-		log.Println(" => start unscoped turn " + strconv.QuoteRune(action) + " at speed " + strconv.Itoa(speed))
+		application.Info(" => start unscoped turn " + strconv.QuoteRune(action) + " at speed " + strconv.Itoa(speed))
 
 		// Process direct speed
 		command := connect.RobotCommand{Action: action, Dim: speed}
@@ -250,18 +263,18 @@ func prepareUnscopedTurnConstantSpeedRun(action rune, speed int) func() {
 	}
 }
 
-func prepareScopedMoveVariableSpeedStepsRun(startSpeed, endSpeed, centimeter int) func() {
+func prepareScopedMoveVariableSpeedStepsRun(startSpeed, endSpeed, centimeter int) func(doStop bool) {
 
 	steps := application.State.Config.SpeedChangeSteps
 	stepSpeedChange := (endSpeed - startSpeed) / (steps - 1)
 	stepCentimer := centimeter / steps
 
-	log.Println("Variable speed prepare with " + strconv.Itoa(steps) + " steps, of " + strconv.Itoa(stepCentimer) + " cm, adding " + strconv.Itoa(stepSpeedChange) + " to speed")
+	application.Info("Variable speed prepare with " + strconv.Itoa(steps) + " steps, of " + strconv.Itoa(stepCentimer) + " cm, adding " + strconv.Itoa(stepSpeedChange) + " to speed")
 
-	return func() {
+	return func(doStop bool) {
 		currentSpeed := startSpeed
 
-		log.Println("[Start move steps for variable speed]")
+		application.Info("[Start move steps for variable speed]")
 
 		// Process required steps
 		for index := 0; index < steps-1; index++ {
@@ -270,14 +283,16 @@ func prepareScopedMoveVariableSpeedStepsRun(startSpeed, endSpeed, centimeter int
 			currentSpeed += stepSpeedChange
 		}
 
-		// End stop
-		processStopAction()
+		// And stop if asked
+		if doStop {
+			processStopAction()
+		}
 	}
 }
 
 func processStopAction() {
 
-	log.Println(" => stop move")
+	application.Info(" => stop move")
 
 	command := connect.RobotCommand{Action: 's', Dim: 0}
 	command.Send()
@@ -285,7 +300,7 @@ func processStopAction() {
 
 func processMoveCentimeterAction(speed int, duration time.Duration) {
 
-	log.Println(" => scoped move at speed " + strconv.Itoa(speed) + " and sleep " + duration.String())
+	application.Info(" => scoped move at speed " + strconv.Itoa(speed) + " and sleep " + duration.String())
 
 	command := connect.RobotCommand{Action: 'S', Dim: speed}
 	command.Send()
@@ -297,7 +312,7 @@ func processMoveCentimeterAction(speed int, duration time.Duration) {
 
 func processTurnDegreeAction(action rune, speed int, duration time.Duration) {
 
-	log.Println(" => scoped turn " + strconv.QuoteRune(action) + " at speed " + strconv.Itoa(speed) + " and sleep " + duration.String())
+	application.Info(" => scoped turn " + strconv.QuoteRune(action) + " at speed " + strconv.Itoa(speed) + " and sleep " + duration.String())
 
 	command := connect.RobotCommand{Action: action, Dim: speed}
 	command.Send()
@@ -319,4 +334,13 @@ func prepareDurationForDistance(speed, centimer int) time.Duration {
 
 func prepareDurationForTurnDegree(speed, degree int) time.Duration {
 	return time.Duration((degree*application.State.Config.DegreeToSpeedRatio)/speed) * time.Millisecond
+}
+
+func options2Map(options []string) map[string]bool {
+	set := make(map[string]bool, len(options))
+	for _, s := range options {
+		set[s] = true
+	}
+
+	return set
 }

@@ -1,7 +1,6 @@
 package pilote
 
 import (
-	"log"
 	"robotoby/application"
 	"robotoby/connect"
 	"strconv"
@@ -33,10 +32,10 @@ func StartStateUpdate() {
 			temperatureDeb.storeIfClean(mon.Temperature)
 			leftSpeed = mon.LeftMotorState
 			rightSpeed = mon.RightMotorState
-			application.Debug("Get state : Left = " + strconv.Itoa(positionLeftDeb.getCurrent()) + ", Right = " + strconv.Itoa(positionRightDeb.getCurrent()) + ", Temperature = " + strconv.Itoa(temperatureDeb.getCurrent()))
+			application.Info("Get state : Left = " + strconv.Itoa(positionLeftDeb.getCurrent()) + ", Right = " + strconv.Itoa(positionRightDeb.getCurrent()) + ", Temperature = " + strconv.Itoa(temperatureDeb.getCurrent()))
 		}
 	}()
-	log.Println("Monitoring linked - Starting auto pilote")
+	application.Info("Monitoring linked to state update")
 }
 
 // GetCurrentRobotState : get current clean position, left / right

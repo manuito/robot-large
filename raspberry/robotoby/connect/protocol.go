@@ -104,10 +104,16 @@ func monitoringValue(pos int, codes []string) int {
 	return int(v)
 }
 
-func readMonitoring(rawValue string) RobotMonitoring {
-	codes := strings.Split(rawValue, "|")
+func readMonitoring(rawValue string) *RobotMonitoring {
 
-	return RobotMonitoring{
+	clean := strings.Replace(rawValue, "\r", "", -1)
+	if (clean == "") || (len(clean) < 10) {
+		return nil
+	}
+
+	codes := strings.Split(clean, "|")
+
+	return &RobotMonitoring{
 		MonitoringState: monitoringValue(0, codes),
 		LeftMotorState:  monitoringValue(1, codes),
 		RightMotorState: monitoringValue(2, codes),
@@ -126,7 +132,7 @@ func readMonitoring(rawValue string) RobotMonitoring {
 }
 
 // GetMonitoring : get the monitoring value available in serial RX buffer
-func GetMonitoring() RobotMonitoring {
+func GetMonitoring() *RobotMonitoring {
 
 	v, err := receiveSerial()
 

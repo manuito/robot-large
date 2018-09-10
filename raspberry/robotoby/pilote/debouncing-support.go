@@ -2,6 +2,7 @@ package pilote
 
 import (
 	"robotoby/application"
+	"strconv"
 )
 
 /*
@@ -20,14 +21,12 @@ type debouncedValue struct {
 // avgDeb : Get the average value in debouncedValue, cleaned
 func (deb *debouncedValue) avgDeb() int {
 
-	max := application.State.Config.DebounceBufferSize
-	var proc, cur, sum int
+	var proc, sum int
 
-	// Get existing values for AVG
-	for index := 0; index < max; index++ {
-		cur = deb.values[index]
+	for _, cur := range deb.values {
+
 		if cur > -1 {
-			sum += deb.values[index]
+			sum += cur
 			proc++
 		}
 	}
@@ -53,12 +52,15 @@ func (deb *debouncedValue) storeIfClean(value int) {
 			deb.values = append(deb.values, -1)
 		}
 	} else { // Check with debounce
-		if value <= maxVar*deb.avgDeb() {
+		avg := deb.avgDeb()
+		if value <= maxVar*avg {
 			// Check ok, add to top of debounced values
-			for index := 0; index < max-1; index++ {
-				deb.values[index+1] = deb.values[index]
+			for index := max - 1; index > 0; index-- {
+				deb.values[index] = deb.values[index-1]
 			}
 			deb.values[0] = value
+		} else {
+			application.Debug("Found var to debounce : current AVG = " + strconv.Itoa(avg) + " VAR = " + strconv.Itoa(maxVar) + " for VALUE = " + strconv.Itoa(value))
 		}
 	}
 }

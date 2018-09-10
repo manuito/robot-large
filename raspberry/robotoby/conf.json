@@ -1,6 +1,5 @@
 {
     "RobotName": "Robot-Toby",
-    "SerialInf": "tty1",
     "DebounceBufferSize" : 10,
     "DebounceMaxVariation" : 10,
     "StandardMove" : 100,
@@ -9,5 +8,10 @@
     "CentimerToSpeedRatio" : 350,
     "DegreeToSpeedRatio" : 4,
     "SpeedChangeSteps" : 10,
-    "Debug" : false
+    "LogLevel" : "INFO",
+    "MinimalStopRange" : 10,
+    "MonitoringDelayMs" : 200,
+    "SerialSimulation" : "NONE",
+    "SerialDevice" : "/dev/ttyACM0",
+    "SerialSpeed" : 115200
 }

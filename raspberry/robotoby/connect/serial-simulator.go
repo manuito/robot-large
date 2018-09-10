@@ -1,35 +1,27 @@
 package connect
 
-import "log"
+import (
+	"encoding/json"
+	"fmt"
+	"os"
+	"robotoby/application"
+)
 
 /*
  * Some test values generator for simulated robot connect
  */
 
 // See RobotCommand comment for details
-var simuCommands = []string{
-	"MO1|ML10|MR10|DL19|DR17|AX0|AY12|AZ1|GX0|GY0|GZ0|TP30|BA01|FA01|BE00",
-	"MO1|ML10|MR10|DL15|DR14|AX0|AY12|AZ1|GX0|GY0|GZ0|TP30|BA01|FA01|BE00",
-	"MO1|ML10|MR10|DL10|DR12|AX0|AY13|AZ1|GX0|GY0|GZ0|TP30|BA01|FA01|BE00",
-	"MO1|ML10|MR10|DL5|DR10|AX0|AY12|AZ1|GX0|GY0|GZ0|TP30|BA01|FA01|BE00",
-	"MO1|ML10|MR10|DL290|DR8|AX0|AY12|AZ1|GX0|GY0|GZ0|TP30|BA01|FA01|BE00",
-	"MO1|ML10|MR10|DL1|DR6|AX0|AY12|AZ1|GX0|GY0|GZ0|TP30|BA01|FA01|BE00",
-	"MO1|ML10|MR10|DL1|DR7|AX0|AY12|AZ1|GX0|GY0|GZ0|TP30|BA01|FA01|BE00",
-	"MO1|ML10|MR10|DL1|DR2000|AX0|AY12|AZ1|GX0|GY0|GZ0|TP30|BA01|FA01|BE00",
-	"MO1|ML10|MR10|DL5|DR7|AX0|AY12|AZ1|GX0|GY0|GZ0|TP30|BA01|FA01|BE00",
-	"MO1|ML10|MR10|DL9|DR7|AX0|AY12|AZ1|GX0|GY0|GZ0|TP30|BA01|FA01|BE00",
-	"MO1|ML10|MR10|DL9|DR7|AX0|AY12|AZ1|GX0|GY0|GZ0|TP30|BA01|FA01|BE00",
-	"MO1|ML10|MR10|DL9|DR7|AX0|AY12|AZ1|GX0|GY0|GZ0|TP30|BA01|FA01|BE00",
-	"MO1|ML10|MR10|DL2000|DR7|AX0|AY12|AZ1|GX0|GY0|GZ0|TP30|BA01|FA01|BE00",
-	"MO1|ML10|MR10|DL9|DR7|AX0|AY12|AZ1|GX0|GY0|GZ0|TP30|BA01|FA01|BE00",
-	"MO1|ML10|MR10|DL9|DR7|AX0|AY12|AZ1|GX0|GY0|GZ0|TP30|BA01|FA01|BE00",
-	"MO1|ML10|MR10|DL600|DR7|AX0|AY12|AZ1|GX0|GY0|GZ0|TP30|BA01|FA01|BE00",
-	"MO1|ML10|MR10|DL9|DR7|AX0|AY12|AZ1|GX0|GY0|GZ0|TP30|BA01|FA01|BE00"}
+var simuCommands = loadSource()
+
+type simulation struct {
+	Serial []string
+}
 
 var current = 0
 
 func simuSendSerial(value string) {
-	log.Println("Sending : " + value)
+	application.Debug("Sending : " + value)
 }
 
 func simuReceiveSerial() string {
@@ -40,4 +32,16 @@ func simuReceiveSerial() string {
 	val := simuCommands[current]
 	current++
 	return val
+}
+
+func loadSource() []string {
+	file, _ := os.Open(application.State.Config.SerialSimulation)
+	defer file.Close()
+	decoder := json.NewDecoder(file)
+	simulation := simulation{}
+	err := decoder.Decode(&simulation)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	return simulation.Serial
 }
