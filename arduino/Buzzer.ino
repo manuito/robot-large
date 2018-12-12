@@ -1,5 +1,5 @@
 // Mario main theme melody
-int melody[] = {
+int mario_melody[] = {
   NOTE_E7, NOTE_E7, 0, NOTE_E7,
   0, NOTE_C7, NOTE_E7, 0,
   NOTE_G7, 0, 0,  0,
@@ -27,7 +27,7 @@ int melody[] = {
 };
 
 // Mario main them tempo
-int tempo[] = {
+int mario_tempo[] = {
   12, 12, 12, 12,
   12, 12, 12, 12,
   12, 12, 12, 12,
@@ -100,6 +100,35 @@ int underworld_tempo[] = {
   3, 3, 3
 };
 
+int buzzerCpt = 0;
+int buzzerCurrentAction;
+
+void setBuzzerAction(byte action){
+  buzzerCurrentAction = action - 48;
+}
+
+void doBuzzerAction(){
+   switch (buzzerCurrentAction) {
+    case 1:
+      doBeep();
+      buzzerCurrentAction = 0;
+      break;
+    case 0:
+      break;
+  }
+}
+
+void doBuzzerShortAction(){
+   switch (buzzerCurrentAction) {
+    case 2:
+      doSingMarioTheme();
+      break;
+    case 3:
+      doSingUnderworldTheme();
+      break;
+  }
+}
+
 void doBeep(){
    tone(BUZZER_PIN, 600, 200);
 }
@@ -112,46 +141,55 @@ void doSingUnderworldTheme() {
   sing(2);
 }
 
+int getBuzzerAction(){
+  return buzzerCurrentAction;
+}
+
 void sing(int song) {
   // iterate over the notes of the melody:
   if (song == 2) {
-    int size = sizeof(underworld_melody) / sizeof(int);
-    for (int thisNote = 0; thisNote < size; thisNote++) {
- 
+    processSong(underworld_melody, underworld_tempo, 56);
+  } else { 
+    processSong(mario_melody, mario_tempo, 78);
+  }
+}
+
+void processSong(int melody[], int tempo[], int size) {
+
+  if(buzzerCpt < size){
+      // Stop previous note if any
+      
       // to calculate the note duration, take one second
       // divided by the note type.
       //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
-      int noteDuration = 1000 / underworld_tempo[thisNote];
- 
-      tone(BUZZER_PIN, underworld_melody[thisNote], noteDuration);
+      int noteDuration = 1000 / tempo[buzzerCpt];
+      float note = melody[buzzerCpt];
+
+      Serial.print("Expected Note : ");
+      if(note > 0){
+      Serial.print("Note : ");
+      
+      Serial.print(buzzerCpt);
+      Serial.print("/");
+      Serial.print(size);
+      Serial.print(" => ");
+      Serial.print(note);
+      Serial.print(" for ");
+      Serial.print(tempo[buzzerCpt]);
+      Serial.println("");
+      tone(BUZZER_PIN, note, noteDuration);
  
       // to distinguish the notes, set a minimum time between them.
       // the note's duration + 30% seems to work well:
-      int pauseBetweenNotes = noteDuration * 1.30;
-      delay(pauseBetweenNotes);
- 
+    //  int pauseBetweenNotes = noteDuration * 1.30;
+    //  delay(pauseBetweenNotes);
+      } else {
+        tone(BUZZER_PIN, 0, noteDuration);
+      }
       // stop the tone playing:
-      tone(BUZZER_PIN, 0, noteDuration);
-    }
- 
+      buzzerCpt++;
   } else {
-    int size = sizeof(melody) / sizeof(int);
-    for (int thisNote = 0; thisNote < size; thisNote++) {
- 
-      // to calculate the note duration, take one second
-      // divided by the note type.
-      //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
-      int noteDuration = 1000 / tempo[thisNote];
- 
-      tone(BUZZER_PIN, melody[thisNote], noteDuration);
- 
-      // to distinguish the notes, set a minimum time between them.
-      // the note's duration + 30% seems to work well:
-      int pauseBetweenNotes = noteDuration * 1.30;
-      delay(pauseBetweenNotes);
- 
-      // stop the tone playing:
-      tone(BUZZER_PIN, 0, noteDuration);
-    }
+    buzzerCpt = 0;
+    buzzerCurrentAction = 0; // Stop when completed
   }
 }
