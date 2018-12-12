@@ -62,7 +62,7 @@ Use file *conf.json* :
         "MinimalStopRange" : 10,            // ==> Minimal distance (in centimeters) for obstacle avoidance in auto-drive
         "MonitoringDelayMs" : 200,          // ==> Interval in ms between each sensor serial read
         "SerialSimulation" : "NONE",        // ==> Can enable some test values for serial. Use files into /simulations folder
-        "SerialDevice" : "/dev/ttyACM0",    // ==> Serial device in "real" serial connection
+        "SerialDevice" : "/dev/serial0",    // ==> Serial device in "real" serial connection
         "SerialSpeed" : 115200              // ==> Serial speed (bauds)
     }
 

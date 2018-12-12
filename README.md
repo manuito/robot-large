@@ -22,6 +22,8 @@ I will publish more details on the used components later. On the protoboard thei
 
 Everything is build using standard modules, integrated with a perma-proto board. The perma proto board is an official Mega perma proto, which is the easier to use actually with Mega2560 (I tryed some other + custom perma proto). 
 
+**Update** : robot has now a pixy2 CMUCAM on board, linked to the mega board. The code for it is not completed yet. I will use it for testing Pixy2 capabilities, and maybe to add "line following" ability to the robot.
+
 ## Programming it
 
 Two main components to program :
