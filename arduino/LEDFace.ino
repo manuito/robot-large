@@ -16,6 +16,10 @@ void setFaceAction(byte action){
   faceCurrentAction = action - 48;
 }
 
+int getFaceAction(){
+  return faceCurrentAction;
+}
+
 void doFaceAction(){
   
    switch (faceCurrentAction) {
@@ -78,4 +82,40 @@ void lookRightOrLeft(){
     lc.setRow(0,7,B00000000);
   }
   faceSwap = !faceSwap;
+}
+
+// Max 5
+void displayLoadingFace(uint8_t stepLoad){
+   switch (stepLoad) {
+    case 1: 
+      lc.setRow(0,0,B00000000);
+      lc.setRow(0,1,B11000011);
+      lc.setRow(0,2,B10100111);
+      lc.setRow(0,3,B10011111);
+      lc.setRow(0,4,B10011111);
+      lc.setRow(0,5,B10100111);
+      lc.setRow(0,6,B11000011);
+      lc.setRow(0,7,B00000000);
+      lc.setRow(0,0,B00000000);
+      break;
+    case 2: 
+      lc.setRow(0,0,B00000000);
+      lc.setRow(0,1,B11000011);
+      lc.setRow(0,2,B10100111);
+      lc.setRow(0,3,B10111011);
+      lc.setRow(0,4,B10111011);
+      lc.setRow(0,5,B10100111);
+      lc.setRow(0,6,B11000011);
+      lc.setRow(0,7,B00000000);
+      break;
+    case 3: 
+      lc.setRow(0,1,B11000011);
+      lc.setRow(0,2,B11100101);
+      lc.setRow(0,3,B11111001);
+      lc.setRow(0,4,B11111001);
+      lc.setRow(0,5,B11100101);
+      lc.setRow(0,6,B11000011);
+      lc.setRow(0,7,B00000000);
+      break;
+   }
 }

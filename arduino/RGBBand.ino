@@ -1,5 +1,5 @@
 // RGB Band
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(15, RGB_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(RGB_LED_COUNT, RGB_PIN, NEO_GRB + NEO_KHZ800);
 
 bool bandSwap = false;
 int bandCpt = 0;
@@ -13,6 +13,10 @@ void startBand(){
 
 void setBandAction(byte action){
   bandCurrentAction = action - 48;
+}
+
+int getBandAction(){
+  return bandCurrentAction;
 }
 
 void doBandShortAction(){
@@ -29,7 +33,7 @@ void doBandAction(){
       doPoliceLight();
       break;
     case 0:
-      startBand();
+      doOff();
       break;
   }
 }
@@ -64,6 +68,13 @@ void doK2000Light(){
     bandCpt = 0;
   } else {
     bandCpt = bandCpt+1;
+  }
+  strip.show();
+}
+
+void doOff(){
+  for(int i = 0; i < RGB_LED_COUNT; i++){
+    strip.setPixelColor(i, strip.Color(0, 0, 0));
   }
   strip.show();
 }
