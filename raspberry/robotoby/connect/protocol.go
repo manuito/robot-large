@@ -54,13 +54,13 @@ type RobotCommand struct {
 // 2]  => MRxy => Right motor state
 // 3]  => DLxy => Left distance value
 // 4]  => DRxy => Right distance value
-// 5]  => AXxy => Accelerometer X
-// 6]  => AYxy => Accelerometer Y
-// 7]  => AZxy => Accelerometer Z
-// 8]  => GXxy => Gyroscop X
-// 9]  => GYxy => Gyroscop Y
-// 10] => GZxy => Gyroscop Z
-// 11] => TPxy => Temperature
+// 5]  => RXxy => Rotation X° 0 to 360° / 180° = straight
+// 6]  => RYxy => Rotation Y° 0 to 360° / 180° = straight
+// 7]  => RZxy => Rotation Z° 0 to 360° / 180° = straight
+// 8]  => AXxy => Accelerometer X
+// 9]  => AYxy => Accelerometer Y
+// 10] => AZxy => Accelerometer Z
+// 11] => TPxy => Temperature °C
 // 12] => BAxy => RGB Band state
 // 13] => FAxy => Face state
 // 14] => BExy => Beeper state
@@ -70,12 +70,12 @@ type RobotMonitoring struct {
 	RightMotorState int
 	LeftDistance    int
 	RightDistance   int
+	RotationX       int
+	RotationY       int
+	RotationZ       int
 	AccelX          int
 	AccelY          int
 	AccelZ          int
-	GyroX           int
-	GyroY           int
-	GyroZ           int
 	Temperature     int
 	BandState       int
 	FaceState       int
@@ -119,12 +119,12 @@ func readMonitoring(rawValue string) *RobotMonitoring {
 		RightMotorState: monitoringValue(2, codes),
 		LeftDistance:    monitoringValue(3, codes),
 		RightDistance:   monitoringValue(4, codes),
-		AccelX:          monitoringValue(5, codes),
-		AccelY:          monitoringValue(6, codes),
-		AccelZ:          monitoringValue(7, codes),
-		GyroX:           monitoringValue(8, codes),
-		GyroY:           monitoringValue(9, codes),
-		GyroZ:           monitoringValue(10, codes),
+		RotationX:       monitoringValue(5, codes),
+		RotationY:       monitoringValue(6, codes),
+		RotationZ:       monitoringValue(7, codes),
+		AccelX:          monitoringValue(8, codes),
+		AccelY:          monitoringValue(9, codes),
+		AccelZ:          monitoringValue(10, codes),
 		Temperature:     monitoringValue(11, codes),
 		BandState:       monitoringValue(12, codes),
 		FaceState:       monitoringValue(13, codes),

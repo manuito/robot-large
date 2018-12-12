@@ -5,6 +5,7 @@
 // 3 number : 123
 // Then send ACK + X
 
+
 char cmdBuffer[4];
 int serIn; 
 
@@ -120,20 +121,24 @@ void doMonitoring(){
     Serial.print(getLeftDist());
     Serial.print("|DR");
     Serial.print(getRightDist());
+    Serial.print("|RX");
+    Serial.print(getAngleX());
+    Serial.print("|RY");
+    Serial.print(getAngleY());
+    Serial.print("|RZ");
+    Serial.print(getAngleZ());
     Serial.print("|AX");
     Serial.print(getAccelX());
     Serial.print("|AY");
     Serial.print(getAccelY());
     Serial.print("|AZ");
     Serial.print(getAccelZ());
-    Serial.print("|GX");
-    Serial.print(getGyroX());
-    Serial.print("|GY");
-    Serial.print(getGyroY());
-    Serial.print("|GZ");
-    Serial.print(getGyroZ());
     Serial.print("|TP");
     Serial.println(getTemperature());
+
+    
+// 12] => BAxy => RGB Band state
+// 13] => FAxy => Face state
+// 14] => BExy => Beeper state
   }
 }
-

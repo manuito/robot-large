@@ -1,55 +1,51 @@
 // Accel
-const int MPU_addr=0x68;  // I2C address of the MPU-6050
-int16_t AcX,AcY,AcZ,Tmp,GyX,GyY,GyZ;
+MPU6050 mpu6050(Wire);
 
 void startAccel(){
   // Start accel (I2C)
   Wire.begin();
-  Wire.beginTransmission(MPU_addr);
-  Wire.write(0x6B);  // PWR_MGMT_1 register
-  Wire.write(0);     // set to zero (wakes up the MPU-6050)
-  Wire.endTransmission(true);
+  mpu6050.begin();
+}
+
+void zeroAccel(){
+  mpu6050.calcGyroOffsets(300);
 }
 
 void updateAccel(){
-  Wire.beginTransmission(MPU_addr);
-  Wire.write(0x3B);  // starting with register 0x3B (ACCEL_XOUT_H)
-  Wire.endTransmission(false);
-  Wire.requestFrom(MPU_addr,14,true);  // request a total of 14 registers
-  AcX=Wire.read()<<8|Wire.read();  // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)    
-  AcY=Wire.read()<<8|Wire.read();  // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
-  AcZ=Wire.read()<<8|Wire.read();  // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
-  Tmp=Wire.read()<<8|Wire.read();  // 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
-  GyX=Wire.read()<<8|Wire.read();  // 0x43 (GYRO_XOUT_H) & 0x44 (GYRO_XOUT_L)
-  GyY=Wire.read()<<8|Wire.read();  // 0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
-  GyZ=Wire.read()<<8|Wire.read();  // 0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)
+  mpu6050.update();
 }
 
-int16_t getAccelX(){
-  return AcX;
+uint8_t getAngleX(){
+  return (uint8_t) (mpu6050.getAngleX() + 180);
 }
 
-int16_t getAccelY(){
-  return AcY;
+uint8_t getAngleY(){
+  return (uint8_t) (mpu6050.getAngleY() + 180);
 }
 
-int16_t getAccelZ(){
-  return AcZ;
+uint8_t getAngleZ(){
+  return (uint8_t) (mpu6050.getAngleZ() + 180);
 }
 
-int16_t getGyroX(){
-  return GyX;
+uint8_t getAccelX(){
+  // For now : disabled
+  // return mpu6050.getAccX() * 1000;
+  return 0;
 }
 
-int16_t getGyroY(){
-  return GyY;
+uint8_t getAccelY(){
+  // For now : disabled
+  // return mpu6050.getAccY() * 1000;
+  return 0;
 }
 
-int16_t getGyroZ(){
-  return GyZ;
+uint8_t getAccelZ(){
+  // For now : disabled
+  // return mpu6050.getAccZ() * 1000;
+  return 0;
 }
 
 float getTemperature() {
-  return Tmp/340.00+36.53;
+  return (uint8_t) mpu6050.getTemp();
 }
 
