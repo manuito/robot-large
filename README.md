@@ -12,6 +12,7 @@ Here I will publish everything I did to build my first "large" robot, using :
   * 1 Buzzer
   * 1 I2C 6 axis Gy
 * A RaspberryPi W Zero for management / wifi support 
+  * With Raspberry Pi camera
 * A level shifter 5v-3.3v for UART link between Raspberry and Arduino
 
 ![An ugly boy](docs/robot.jpg?raw=true "An ugly boy")
@@ -22,7 +23,7 @@ I will publish more details on the used components later. On the protoboard thei
 
 Everything is build using standard modules, integrated with a perma-proto board. The perma proto board is an official Mega perma proto, which is the easier to use actually with Mega2560 (I tryed some other + custom perma proto). 
 
-**Update** : robot has now a pixy2 CMUCAM on board, linked to the mega board. The code for it is not completed yet. I will use it for testing Pixy2 capabilities, and maybe to add "line following" ability to the robot.
+**Update** : robot has now a raspberryPi camera on board. For now it is used only through standard RaspberryPu camera streaming
 
 ## Programming it
 
@@ -39,6 +40,8 @@ WIP - I'm working on 3 different robot projects on the same time + job + familly
 See arduino sub-folder. Done with Arduino IDE and various standard libs. 
 
 I use a time splited process, where execution is processed in repeated step, with support for one step action on each device at each repeated step. Currently the step are "ok" but the rate is still it little bit low. And for sensors without prefixed response time (like UltraSonic sensors) it's not constant. I will try other solution during the "improving" steps of the project.
+
+In the last updates, the startup process has been simplified to lower power consumption. Until Raspberry app is started, the Mega board just light up one loading LED.
 
 ### Raspberry code
 
