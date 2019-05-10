@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"log"
 	"robotoby/application"
+	"strings"
 
 	"github.com/tarm/serial"
 )
@@ -57,15 +58,19 @@ func receiveSerial() (string, error) {
 	}
 
 	// Here receive
-
-	buf := make([]byte, 128)
+	buf := make([]byte, 256)
 	_, err := port.Read(buf)
 
+	first := string(buf[:])
+
 	reader := bufio.NewReader(port)
+
+	// Stop on end of line
 	reply, err := reader.ReadBytes('\r')
-	result := string(reply[:])
 
-	application.Debug("Serial get => " + result)
+	// Splited value support ...
+	result := first + string(reply[:])
 
-	return result, err
+	// Clean buffer empty chars
+	return strings.Replace(result, string('\x00'), "", -1), err
 }

@@ -11,7 +11,7 @@ import (
  */
 
 var positionLeftDeb, positionRightDeb, temperatureDeb debouncedValue
-var leftSpeed, rightSpeed int
+var leftSpeed, rightSpeed, bandState, faceState, beeperState int
 
 // RobotState : global state model with usefull values
 type RobotState struct {
@@ -20,6 +20,14 @@ type RobotState struct {
 	LeftSpeed     int
 	RightSpeed    int
 	Temperature   int
+	Action        RobotAction
+}
+
+// RobotAction : current action processing
+type RobotAction struct {
+	BandState   int
+	FaceState   int
+	BeeperState int
 }
 
 // StartStateUpdate : Start to get monitoring and clean positions
@@ -32,6 +40,9 @@ func StartStateUpdate() {
 			temperatureDeb.storeIfClean(mon.Temperature)
 			leftSpeed = mon.LeftMotorState
 			rightSpeed = mon.RightMotorState
+			bandState = mon.BandState
+			faceState = mon.FaceState
+			beeperState = mon.BeeperState
 			application.Info("Get state : Left = " + strconv.Itoa(positionLeftDeb.getCurrent()) + ", Right = " + strconv.Itoa(positionRightDeb.getCurrent()) + ", Temperature = " + strconv.Itoa(temperatureDeb.getCurrent()))
 		}
 	}()
@@ -47,5 +58,10 @@ func GetCurrentRobotState() RobotState {
 		leftSpeed,
 		rightSpeed,
 		temperatureDeb.getCurrent(),
+		RobotAction{
+			bandState,
+			faceState,
+			beeperState,
+		},
 	}
 }

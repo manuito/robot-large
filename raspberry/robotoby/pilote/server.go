@@ -145,10 +145,11 @@ func StartServer() {
 		PostBuildSwaggerObjectHandler: enrichSwaggerObject}
 	restful.DefaultContainer.Add(restfulspec.NewOpenAPIService(config))
 
-	// Optionally, you can install the Swagger Service which provides a nice Web UI on your REST API
-	// You need to download the Swagger HTML5 assets and change the FilePath location in the config below.
-	// Open http://localhost:8080/apidocs/?url=http://localhost:8080/apidocs.json
+	// Swagger-ui
 	http.Handle("/apidocs/", http.StripPrefix("/apidocs/", http.FileServer(http.Dir("./pilote/swagger-ui/dist-v2"))))
+
+	// Pilote
+	http.Handle("/control/", http.StripPrefix("/control/", http.FileServer(http.Dir("./pilote/control-ui"))))
 
 	// Optionally, you may need to enable CORS for the UI to work.
 	cors := restful.CrossOriginResourceSharing{

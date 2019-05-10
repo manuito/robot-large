@@ -19,6 +19,9 @@ var delay = time.Duration(application.State.Config.MonitoringDelayMs)
 // StartGetMonitoring :
 func StartGetMonitoring() {
 	application.Info("Starting auto read of monitoring")
+
+	SendStart()
+
 	go func() {
 		for !stop {
 			time.Sleep(delay * time.Millisecond)

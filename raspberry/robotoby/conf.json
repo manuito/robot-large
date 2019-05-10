@@ -11,7 +11,7 @@
     "LogLevel" : "INFO",
     "MinimalStopRange" : 10,
     "MonitoringDelayMs" : 200,
-    "SerialSimulation" : "NONE",
-    "SerialDevice" : "/dev/ttyACM0",
+    "SerialSimulation" : "simulations/serial-move.json",
+    "SerialDevice" : "/dev/serial1",
     "SerialSpeed" : 115200
 }

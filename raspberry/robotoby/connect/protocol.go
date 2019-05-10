@@ -8,6 +8,7 @@ package connect
 
 import (
 	"fmt"
+	"robotoby/application"
 	"strconv"
 	"strings"
 )
@@ -87,6 +88,11 @@ func (c *RobotCommand) convertSerial() string {
 	return string(c.Action) + strconv.Itoa(c.Dim)
 }
 
+// SendStart : sending the startup command with serial connect
+func SendStart() error {
+	return sendSerial("M")
+}
+
 // Send : sending the command with serial connect
 func (c *RobotCommand) Send() error {
 	return sendSerial(c.convertSerial())
@@ -94,6 +100,10 @@ func (c *RobotCommand) Send() error {
 
 // Converter for one monitoring value in raw serial values
 func monitoringValue(pos int, codes []string) int {
+
+	if len(codes[pos]) < 3 {
+		return 0
+	}
 
 	v, err := strconv.Atoi((codes[pos])[2:])
 
@@ -106,7 +116,10 @@ func monitoringValue(pos int, codes []string) int {
 
 func readMonitoring(rawValue string) *RobotMonitoring {
 
-	clean := strings.Replace(rawValue, "\r", "", -1)
+	clean := strings.Replace(strings.Replace(rawValue, "\r", "", -1), "\n", "", -1)
+
+	application.Debug(clean)
+
 	if (clean == "") || (len(clean) < 10) {
 		return nil
 	}
