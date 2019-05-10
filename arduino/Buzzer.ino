@@ -101,7 +101,7 @@ int underworld_tempo[] = {
 };
 
 int buzzerCpt = 0;
-int buzzerCurrentAction;
+uint8_t buzzerCurrentAction;
 
 void setBuzzerAction(byte action){
   buzzerCurrentAction = action - 48;
@@ -141,11 +141,11 @@ void doSingUnderworldTheme() {
   sing(2);
 }
 
-int getBuzzerAction(){
+uint8_t getBuzzerAction(){
   return buzzerCurrentAction;
 }
 
-void sing(int song) {
+void sing(uint8_t song) {
   // iterate over the notes of the melody:
   if (song == 2) {
     processSong(underworld_melody, underworld_tempo, 56);

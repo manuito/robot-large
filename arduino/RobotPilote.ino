@@ -35,53 +35,44 @@
 
 // Various delay
 #define MINIMAL_DELAY       25
-#define MONITORING_DELAY    20 * MINIMAL_DELAY
-#define SHORT_ACTION_DELAY  10 * MINIMAL_DELAY
+#define MONITORING_DELAY    10 * MINIMAL_DELAY
+#define SHORT_ACTION_DELAY  5  * MINIMAL_DELAY
 #define ACTION_DELEAY       20 * MINIMAL_DELAY
 
 // And loop control
-int monitoringStep = 0;
-int actionStep = 0;
-int shortActionStep = 0;
+long monitoringStep = 0;
+long actionStep = 0;
+long shortActionStep = 0;
+bool started = false;
 
 void setup() {  
 
+  // Low current, minimal start
   pinMode(LED_STARTED, OUTPUT);
-  digitalWrite(LED_STARTED, HIGH);
-  
-  // Start sensors / actions
-  startFace();
-  displayLoadingFace(1);
-  delay(500);
-  startSerial();
-  pinMode(BUZZER_PIN, OUTPUT);
-  startAccel();
-  startBand();
-  setupMotors();
-  startHsSensors();
-  displayLoadingFace(2);
-  delay(500);
-  zeroAccel();
-  displayLoadingFace(3);
-  
-  // Do a beep
-  doBeep();
-  setFaceAction('1');
-  
-  // Ready (TODO : raspb ACK)
-  sendReady();
   digitalWrite(LED_STARTED, LOW);
+  startFace();
+  startSerial();
+  
+  // 0 motors
+  setupMotors();
+
+  // Low-Loading ...
+  setFaceAction('4');
 }
 
 void loop() {
 
+  long loopStart = millis();
+
   if(checkCommand()){
+    if(!started){
+      loadComplete();
+      started = true;
+    }
     processCommand();
   }
   
   if(monitoringStep >= MONITORING_DELAY){
-    updateDistances();
-    updateAccel();
     doMonitoring();
     monitoringStep = 0;
   } else {
@@ -98,14 +89,48 @@ void loop() {
   }
 
   if(actionStep >= SHORT_ACTION_DELAY){
+    updateDistances();
+    updateAccel();
     doBandShortAction();
+    doFaceShortAction();
     doBuzzerShortAction();
     shortActionStep = 0;
   } else {
     shortActionStep += MINIMAL_DELAY;
   }
+
+  long duration = millis() - loopStart;
+
+  // Try to 
+  if(duration < MINIMAL_DELAY){
+    delay(MINIMAL_DELAY - duration);
+  }
   
-  delay(MINIMAL_DELAY);
+  digitalWrite(LED_STARTED, LOW);
+}
+
+void loadComplete(){
+  
+  pinMode(BUZZER_PIN, OUTPUT);
+  digitalWrite(LED_STARTED, HIGH);
+  
+  // Start sensors / actions
+  displayLoadingFace(1);
+  delay(500);
+  startAccel();
+  startBand();
+  startHsSensors();
+  displayLoadingFace(2);
+  delay(500);
+  zeroAccel();
+  displayLoadingFace(3);
+  
+  // Do a beep
+  doBeep();
+  setFaceAction('1');
+  
+  // Ready (TODO : raspb ACK)
+  sendReady();
   digitalWrite(LED_STARTED, LOW);
 }
 

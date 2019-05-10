@@ -5,6 +5,23 @@
 // 3 number : 123
 // Then send ACK + X
 
+// See robotoby for protocol : 
+// Fixed order for attributes :
+// 0]  => MOx  => Monitoring state (always on = 1)
+// 1]  => MLxy => Left motor state
+// 2]  => MRxy => Right motor state
+// 3]  => DLxy => Left distance value
+// 4]  => DRxy => Right distance value
+// 5]  => RXxy => Rotation X° 0 to 360° / 180° = straight
+// 6]  => RYxy => Rotation Y° 0 to 360° / 180° = straight
+// 7]  => RZxy => Rotation Z° 0 to 360° / 180° = straight
+// 8]  => AXxy => Accelerometer X
+// 9]  => AYxy => Accelerometer Y
+// 10] => AZxy => Accelerometer Z
+// 11] => TPxy => Temperature °C
+// 12] => BAxy => RGB Band state
+// 13] => FAxy => Face state
+// 14] => BExy => Beeper state
 
 char cmdBuffer[4];
 int serIn; 
@@ -25,6 +42,7 @@ void sendReady(){
 
 bool checkCommand(){
   if (Serial.available()) {
+    digitalWrite(LED_STARTED, HIGH);   // turn the LED on (HIGH is the voltage level)
     Serial.readBytes(cmdBuffer, Serial.available());
     Serial.print("ACK");
     Serial.println(cmdBuffer[0]);
@@ -43,59 +61,40 @@ void processCommand(){
       monitoringState = 0;
       break;
     case 'B':
-      doBeep();
+      setBuzzerAction(cmdBuffer[3]);
       break;
-    case 'T':
-      doSingMarioTheme();
-      break;
-    case 'W':
-      doSingUnderworldTheme();
+    case 'b':
+      setBuzzerAction('0');
       break;
     case 'S': 
-      if(shortMode){goStraight(true, 40);}
-      else{goStraight(toBoolean(cmdBuffer[1]), toInt(cmdBuffer[2], cmdBuffer[3]));}
+      goStraight(toBoolean(cmdBuffer[1]), toInt(cmdBuffer[2], cmdBuffer[3]));
       break;
     case 's': 
       goStraight(true, 0);
       break;
     case 'L': 
-      if(shortMode){turnLeft(30);}
-      else{turnLeft(toInt(cmdBuffer[2], cmdBuffer[3]));}
+      turnLeft(toInt(cmdBuffer[2], cmdBuffer[3]));
       break;
     case 'R': 
-      if(shortMode){turnRight(30);}
-      else{turnRight(toInt(cmdBuffer[2], cmdBuffer[3]));}
-      break;
-    case 'F':
-      if(shortMode){setFaceAction('1');}
-      else{setFaceAction(cmdBuffer[3]);}
-      break;
-    case 'E':
-      setFaceAction('2');
-      break;
-    case 'f':
-      setFaceAction('0');
-      break;
-    case 'U':
-      if(shortMode){setBandAction('1');}
-      else{setBandAction(cmdBuffer[3]);}
-      break;
-    case 'K':
-      setBandAction('2');
-      break;
-    case 'u':
-      setBandAction('0');
+      turnRight(toInt(cmdBuffer[2], cmdBuffer[3]));
       break;
     case 'H':
-      shortMode = true;
+      setFaceAction(cmdBuffer[3]);
       break;
     case 'h':
-      shortMode = false;
-      cmdBuffer[1] = 0;
-      cmdBuffer[2] = 0;
-      cmdBuffer[3] = 0;
+      setFaceAction('0');
+      break;
+    case 'F':
+      setBandAction(cmdBuffer[3]);
+      break;
+    case 'f':
+      setBandAction('0');
       break;
   }
+  
+  cmdBuffer[1] = 0;
+  cmdBuffer[2] = 0;
+  cmdBuffer[3] = 0;
 }
 
 bool toBoolean(byte val){
@@ -134,11 +133,13 @@ void doMonitoring(){
     Serial.print("|AZ");
     Serial.print(getAccelZ());
     Serial.print("|TP");
-    Serial.println(getTemperature());
-
-    
-// 12] => BAxy => RGB Band state
-// 13] => FAxy => Face state
-// 14] => BExy => Beeper state
+    Serial.print(getTemperature());
+    Serial.print("|BA");
+    Serial.print(getBandAction());
+    Serial.print("|FA");
+    Serial.print(getFaceAction());
+    Serial.print("|BE");
+    Serial.println(getBuzzerAction());
   }
 }
+

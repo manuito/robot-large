@@ -2,8 +2,8 @@
 LedControl lc = LedControl(LED_MRX_DATA_IN,LED_MRX_CLK,LED_MRX_CS,1);
 
 bool faceSwap = false;
-int faceCpt = 0;
-int faceCurrentAction;
+uint8_t faceCpt = 0;
+uint8_t faceCurrentAction;
 
 void startFace(){
   // Wakeup LED matrix
@@ -13,10 +13,12 @@ void startFace(){
 }
 
 void setFaceAction(byte action){
+  faceOff();
   faceCurrentAction = action - 48;
+  faceCpt = 0;
 }
 
-int getFaceAction(){
+uint8_t getFaceAction(){
   return faceCurrentAction;
 }
 
@@ -29,8 +31,19 @@ void doFaceAction(){
     case 2: 
       displayEarthBeat();
       break;
+    case 4:
+      displayLightLoad();
+      break;
     default:
-      faceOff();
+      break;
+  }
+}
+void doFaceShortAction(){
+  
+   switch (faceCurrentAction) {
+    case 3: 
+      displayRadar();
+      break;
   }
 }
 
@@ -118,4 +131,103 @@ void displayLoadingFace(uint8_t stepLoad){
       lc.setRow(0,7,B00000000);
       break;
    }
+}
+
+void displayLightLoad() {
+
+  // SetLed KO ?
+  switch (faceCpt) {
+    case 1: 
+      lc.setRow(0,0,B00000000);
+      lc.setRow(0,1,B00000000);
+      lc.setRow(0,2,B00000000);
+      lc.setRow(0,3,B00010000);
+      lc.setRow(0,4,B00000000);
+      lc.setRow(0,5,B00000000);
+      lc.setRow(0,6,B00000000);
+      lc.setRow(0,7,B00000000);
+      break;
+    case 2: 
+      lc.setRow(0,0,B00000000);
+      lc.setRow(0,1,B00000000);
+      lc.setRow(0,2,B00000000);
+      lc.setRow(0,3,B00001000);
+      lc.setRow(0,4,B00000000);
+      lc.setRow(0,5,B00000000);
+      lc.setRow(0,6,B00000000);
+      lc.setRow(0,7,B00000000);
+      break;
+    case 3: 
+      lc.setRow(0,0,B00000000);
+      lc.setRow(0,1,B00000000);
+      lc.setRow(0,2,B00000000);
+      lc.setRow(0,3,B00000000);
+      lc.setRow(0,4,B00001000);
+      lc.setRow(0,5,B00000000);
+      lc.setRow(0,6,B00000000);
+      lc.setRow(0,7,B00000000);
+      break;
+    case 4: 
+      lc.setRow(0,0,B00000000);
+      lc.setRow(0,1,B00000000);
+      lc.setRow(0,2,B00000000);
+      lc.setRow(0,3,B00000000);
+      lc.setRow(0,4,B00010000);
+      lc.setRow(0,5,B00000000);
+      lc.setRow(0,6,B00000000);
+      lc.setRow(0,7,B00000000);
+      break;
+   }
+   
+  faceCpt++;
+  if(faceCpt > 4){
+    faceCpt = 1;
+  }
+}
+
+void displayRadar(){
+
+  if(getLeftDist() < 30){
+    if(getLeftDist() < 20){
+      if(getLeftDist() < 10){
+        lc.setRow(0,5,B11110000);
+        lc.setRow(0,6,B11111100);
+        lc.setRow(0,7,B11111110);
+      } else {
+        lc.setRow(0,5,B11000000);
+        lc.setRow(0,6,B11110000);
+        lc.setRow(0,7,B11111000);
+      }
+    } else {
+      lc.setRow(0,5,B00000000);
+      lc.setRow(0,6,B11000000);
+      lc.setRow(0,7,B11100000);
+    }
+  } else {
+      lc.setRow(0,5,B00000000);
+      lc.setRow(0,6,B00000000);
+      lc.setRow(0,7,B00000000);
+  }
+  
+  if(getRightDist() < 30){
+    if(getRightDist() < 20){
+      if(getRightDist() < 10){
+        lc.setRow(0,2,B11110000);
+        lc.setRow(0,1,B11111100);
+        lc.setRow(0,0,B11111110);
+      } else {
+        lc.setRow(0,2,B11000000);
+        lc.setRow(0,1,B11110000);
+        lc.setRow(0,0,B11111000);
+      }
+    } else {
+      lc.setRow(0,2,B00000000);
+      lc.setRow(0,1,B11000000);
+      lc.setRow(0,0,B11100000);
+    }
+  } else {
+      lc.setRow(0,2,B00000000);
+      lc.setRow(0,1,B00000000);
+      lc.setRow(0,0,B00000000);
+  }
 }

@@ -3,7 +3,7 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(RGB_LED_COUNT, RGB_PIN, NEO_GRB + NE
 
 bool bandSwap = false;
 int bandCpt = 0;
-int bandCurrentAction;
+uint8_t bandCurrentAction;
 
 void startBand(){
   // RGB Band
@@ -13,9 +13,11 @@ void startBand(){
 
 void setBandAction(byte action){
   bandCurrentAction = action - 48;
+  doOff();
+  bandCpt = 0;
 }
 
-int getBandAction(){
+uint8_t getBandAction(){
   return bandCurrentAction;
 }
 
@@ -23,6 +25,12 @@ void doBandShortAction(){
    switch (bandCurrentAction) {
     case 2:
       doK2000Light();
+      break;
+    case 3:
+      doRainbowCycle();
+      break;
+    case 4:
+      doRadar();
       break;
   }
 }
@@ -67,7 +75,21 @@ void doK2000Light(){
   if(bandCpt >= 8){
     bandCpt = 0;
   } else {
-    bandCpt = bandCpt+1;
+    bandCpt++;
+  }
+  strip.show();
+}
+
+void doRainbowCycle() {
+  
+  if(bandCpt >= 256*5){
+    bandCpt = 0;
+  } else {
+    bandCpt++;
+  }
+  
+  for(uint8_t i=0; i< RGB_LED_COUNT; i++) {
+    strip.setPixelColor(i, Wheel(((i * 256 / RGB_LED_COUNT) + bandCpt) & 255));
   }
   strip.show();
 }
@@ -79,3 +101,48 @@ void doOff(){
   strip.show();
 }
 
+void doRadar(){
+
+  if(getLeftDist() < 20){
+    if(getLeftDist() < 10){
+      strip.setPixelColor(8, strip.Color(150, 0, 0));
+      strip.setPixelColor(9, strip.Color(150, 0, 0));
+    } else {
+      strip.setPixelColor(8, strip.Color(50, 0, 0));
+      strip.setPixelColor(9, strip.Color(50, 0, 0));
+    }
+  } else {
+    strip.setPixelColor(8, strip.Color(0, 0, 0));
+    strip.setPixelColor(9, strip.Color(0, 0, 0));
+  }
+  
+  if(getRightDist() < 20){
+    if(getRightDist() < 10){
+      strip.setPixelColor(6, strip.Color(150, 0, 0));
+      strip.setPixelColor(7, strip.Color(150, 0, 0));
+    } else {
+      strip.setPixelColor(6, strip.Color(50, 0, 0));
+      strip.setPixelColor(7, strip.Color(50, 0, 0));
+    }
+  } else {
+    strip.setPixelColor(6, strip.Color(0, 0, 0));
+    strip.setPixelColor(7, strip.Color(0, 0, 0));
+  }
+  
+  strip.show();
+}
+
+// Input a value 0 to 255 to get a color value.
+// The colours are a transition r - g - b - back to r.
+uint32_t Wheel(byte WheelPos) {
+  WheelPos = 255 - WheelPos;
+  if(WheelPos < 85) {
+    return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  }
+  if(WheelPos < 170) {
+    WheelPos -= 85;
+    return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  }
+  WheelPos -= 170;
+  return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+}

@@ -45,7 +45,7 @@ uint8_t getAccelZ(){
   return 0;
 }
 
-float getTemperature() {
+uint8_t getTemperature() {
   return (uint8_t) mpu6050.getTemp();
 }
 
