@@ -7,7 +7,7 @@ import (
 )
 
 /*
- * Pilote app configuration management.
+ * Pilot app configuration management.
  * Uses file "conf.json" for configuration definition
  */
 
@@ -28,6 +28,8 @@ type Configuration struct {
 	SerialSimulation     string
 	SerialDevice         string
 	SerialSpeed          int
+	PilotServerPort      int
+	CameraDevice         string
 }
 
 func loadConfiguration() Configuration {
@@ -37,7 +39,7 @@ func loadConfiguration() Configuration {
 	configuration := Configuration{}
 	err := decoder.Decode(&configuration)
 	if err != nil {
-		fmt.Println("error:", err)
+		fmt.Println("Configuration load error:", err)
 	}
 	return configuration
 }

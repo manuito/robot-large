@@ -13,35 +13,35 @@ import (
 	"strings"
 )
 
-// RobotCommand : Definition of a command
+// RobotCommand : Definition of a command.
 //
-//  Command syntax :
+//	Syntax :
 //
-//  M/m => Enable monitoring state
+//	M/m => Enable monitoring state
 //
-//  B/b => beeper
-//    B1 => beep
-//    B2 => mario theme
-//    B3 => mario underworld
+//	B/b => beeper
+//	  B1 => beep
+//	  B2 => mario theme
+//	  B3 => mario underworld
 //
-//  S/s => Straight
-//    Sxy => move speed
+//	S/s => Straight
+//	  Sxy => move speed
 //
-//  L/l => Left
-//    Lxy => turn speed
+//	L/l => Left
+//	  Lxy => turn speed
 //
-//  R/r => Right
-//    Rxy => turn speed
+//	R/r => Right
+//	  Rxy => turn speed
 //
-//  H/h => Head
-//    H1 => face 1
-//    H2 => face 2
+//	H/h => Head
+//	  H1 => face 1
+//	  H2 => face 2
 //
-//  F/f => Band light
-//    F1 => Police
-//    F2 => K2000
-//    F3 => Dim yellow
-//    F4 => Car light
+//	F/f => Band light
+//	  F1 => Police
+//	  F2 => K2000
+//	  F3 => Dim yellow
+//	  F4 => Car light
 type RobotCommand struct {
 	Action rune
 	Dim    int
@@ -101,24 +101,31 @@ func (c *RobotCommand) Send() error {
 // Converter for one monitoring value in raw serial values
 func monitoringValue(pos int, codes []string) int {
 
+	if codes == nil || len(codes) <= pos {
+		return 0
+	}
+
 	if len(codes[pos]) < 3 {
 		return 0
 	}
 
-	v, err := strconv.Atoi((codes[pos])[2:])
+	value := (codes[pos])[2:]
+
+	v, err := strconv.Atoi(value)
 
 	if err != nil {
-		fmt.Print(err)
+		application.Debug(fmt.Sprintf("Ignoring value %v : got parsing error %v", value, err))
+		return 0
 	}
 
-	return int(v)
+	return v
 }
 
 func readMonitoring(rawValue string) *RobotMonitoring {
 
 	clean := strings.Replace(strings.Replace(rawValue, "\r", "", -1), "\n", "", -1)
 
-	application.Debug(clean)
+	application.Debug(fmt.Sprintf("Clean monito : %v", clean))
 
 	if (clean == "") || (len(clean) < 10) {
 		return nil

@@ -2,9 +2,11 @@ package connect
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"robotoby/application"
 	"strings"
+	"time"
 
 	"github.com/tarm/serial"
 )
@@ -21,10 +23,12 @@ func openSerial() *serial.Port {
 	c := &serial.Config{Name: application.State.Config.SerialDevice, Baud: application.State.Config.SerialSpeed}
 	s, err := serial.OpenPort(c)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Cannot open serial port : %v", err)
 	}
 
-	application.Info("Serial connection up on " + application.State.Config.SerialDevice)
+	time.Sleep(2 * time.Second)
+
+	application.Info(fmt.Sprintf("Serial connection up on %v", application.State.Config.SerialDevice))
 
 	return s
 }

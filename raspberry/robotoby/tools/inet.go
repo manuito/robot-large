@@ -9,7 +9,7 @@ import (
 func GetOutboundIP() net.IP {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Cannot find outbound IP with a call to DNS : %v", err)
 	}
 	defer conn.Close()
 

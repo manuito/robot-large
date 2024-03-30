@@ -3,12 +3,12 @@ package main
 import (
 	"fmt"
 	"robotoby/connect"
-	"robotoby/pilote"
+	"robotoby/pilot"
 )
 
 func main() {
 	fmt.Println("Starting server")
 	connect.StartGetMonitoring()
-	pilote.StartStateUpdate()
-	pilote.StartServer()
+	pilot.StartStateUpdate()
+	pilot.StartServer()
 }

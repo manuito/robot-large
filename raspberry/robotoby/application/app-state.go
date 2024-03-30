@@ -6,7 +6,7 @@ import (
 )
 
 /*
- * Global states / configuration access for the current pilote application
+ * Global states / configuration access for the current pilot application
  */
 
 // State : Global application environment

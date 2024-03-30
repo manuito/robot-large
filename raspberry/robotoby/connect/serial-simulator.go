@@ -12,7 +12,7 @@ import (
  */
 
 // See RobotCommand comment for details
-var simuCommands = loadSource()
+var simuCommands []string
 
 type simulation struct {
 	Serial []string
@@ -20,11 +20,20 @@ type simulation struct {
 
 var current = 0
 
+func startSimulation() {
+	application.Info("Start with simulation")
+	simuCommands = loadSource()
+}
+
 func simuSendSerial(value string) {
-	application.Debug("Sending : " + value)
+	application.Debug(fmt.Sprintf("Sending simulated Serial CMD : %v", value))
 }
 
 func simuReceiveSerial() string {
+
+	if simuCommands == nil {
+		startSimulation()
+	}
 
 	if current >= len(simuCommands) {
 		current = 0
@@ -41,7 +50,7 @@ func loadSource() []string {
 	simulation := simulation{}
 	err := decoder.Decode(&simulation)
 	if err != nil {
-		fmt.Println("error:", err)
+		fmt.Println("Simulation load error:", err)
 	}
 	return simulation.Serial
 }
